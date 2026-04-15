@@ -6,6 +6,7 @@
 .pnp.js
 Back_End/node_modules
 Front_End/node_modules
+/docs
 
 # Testing
 /coverage
@@ -21,6 +22,7 @@ Front_End/.next/
 /dist
 Back_End/build
 Front_End/build
+schema.gql
 
 # Misc
 .DS_Store
