@@ -1,51 +1,40 @@
 {
     "compilerOptions": {
-        "target": "ES2020",
-        "useDefineForClassFields": true,
+        "module": "commonjs",
+        "target": "ES2021",
         "lib": [
-            "ES2020",
-            "DOM",
-            "DOM.Iterable"
+            "ES2021"
         ],
-        "module": "ESNext",
-        "skipLibCheck": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        /* Bundler mode */
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
+        "allowJs": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
         "strict": true,
-        "noEmit": true,
-        "jsx": "react-jsx",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "baseUrl": ".",
+        "resolveJsonModule": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "baseUrl": "./src",
         "paths": {
             "@/*": [
-                "src/*"
-            ],
-            "@/pages/*": [
-                "src/pages/*"
-            ],
-            "@/lib/*": [
-                "src/lib/*"
-            ],
-            "@/graphql/*": [
-                "src/graphql/*"
-            ],
-            "@/modules/*": [
-                "src/modules/*"
+                "./*"
             ]
-        }
+        },
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
     },
     "include": [
-        "src",
-        "next-env.d.ts"
+        "src/**/*"
     ],
-    "references": [
-        {
-            "path": "./tsconfig.node.json"
-        }
+    "exclude": [
+        "node_modules",
+        "dist",
+        "test",
+        "**/*spec.ts"
     ]
 }
