@@ -1,0 +1,46 @@
+{
+    "name": "registro-ocorrencias-backend",
+    "version": "1.0.0",
+    "description": "Backend API for Registro de Ocorrências using GraphQL, Prisma and Next.js",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:studio": "prisma studio",
+        "type-check": "tsc --noEmit"
+    },
+    "keywords": [
+        "GraphQL",
+        "Prisma",
+        "Next.js",
+        "TypeScript"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "next": "^14.0.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "apollo-server-micro": "^4.10.0",
+        "@apollo/client": "^3.8.0",
+        "graphql": "^16.8.0",
+        "@prisma/client": "^5.7.0",
+        "swagger-ui-react": "^5.10.0",
+        "swagger-ui-dist": "^5.10.0",
+        "swagger-jsdoc": "^6.2.8"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "@types/react": "^18.2.0",
+        "@types/react-dom": "^18.2.0",
+        "@types/swagger-jsdoc": "^6.0.3",
+        "typescript": "^5.3.0",
+        "prisma": "^5.7.0",
+        "eslint": "^8.54.0",
+        "eslint-config-next": "^14.0.0"
+    }
+}
