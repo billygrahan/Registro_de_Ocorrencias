@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { IncidenteModule } from './modules/incidente/incidente.module'
+import { AuthModule } from './modules/auth/auth.module'
 import { AppController } from './app.controller'
 import { join } from 'path'
 
@@ -17,6 +18,7 @@ import { join } from 'path'
             autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             sortSchema: true,
         }),
+        AuthModule,
         IncidenteModule,
     ],
     controllers: [AppController],

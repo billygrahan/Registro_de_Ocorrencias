@@ -1,13 +1,16 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql'
+import { UseGuards } from '@nestjs/common'
 import { Incidente } from './entities/incidente.entity'
 import { CreateIncidenteInput, UpdateIncidenteInput } from './dto'
 import { IncidenteService } from './incidente.service'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 /**
  * IncidenteResolver
  * Define as Queries e Mutations para a entidade Incidente
  * Utiliza decorators do @nestjs/graphql
  */
+@UseGuards(JwtAuthGuard)
 @Resolver(() => Incidente)
 export class IncidenteResolver {
     constructor(private readonly incidenteService: IncidenteService) { }
