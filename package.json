@@ -1,0 +1,16 @@
+{
+    "name": "registro-ocorrencias-monorepo",
+    "version": "1.0.0",
+    "description": "Monorepo - Backend e Frontend",
+    "private": true,
+    "workspaces": {
+        "packages": [
+            "Back_End"
+        ]
+    },
+    "scripts": {
+        "build": "cd Back_End && npm run build",
+        "start": "cd Back_End && npm run start:prod",
+        "dev": "cd Back_End && npm run start:dev"
+    }
+}
