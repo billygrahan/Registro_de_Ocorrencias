@@ -19,6 +19,7 @@ import { Request } from 'express'
             driver: ApolloDriver,
             autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             sortSchema: true,
+            csrfPrevention: false,
             context: ({ req }: { req: Request }) => {
                 return { req };
             },
