@@ -139,12 +139,21 @@ export class IncidenteService {
      */
     async delete(id: string): Promise<boolean> {
         try {
+            const exists = await this.prisma.incidente.findUnique({
+                where: { id },
+            })
+
+            if (!exists) {
+                throw new Error(`Incidente com ID ${id} não encontrado`)
+            }
+
             await this.prisma.incidente.delete({
                 where: { id },
             })
+
             return true
-        } catch {
-            return false
+        } catch (error: any) {
+            throw new Error(`Erro ao deletar incidente: ${error?.message}`)
         }
     }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { useAuth } from './useAuth'
 import { graphqlRequest } from '@/lib/graphql'
 
@@ -16,6 +16,8 @@ export function useGraphQL<T>(query: string, variables?: Record<string, any>): U
     const [data, setData] = useState<T | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const queryRef = useRef(query)
+    const variablesRef = useRef(variables)
 
     const refetch = useCallback(async () => {
         if (!token) return
@@ -24,7 +26,7 @@ export function useGraphQL<T>(query: string, variables?: Record<string, any>): U
         setError(null)
 
         try {
-            const result = await graphqlRequest(query, variables, token)
+            const result = await graphqlRequest(queryRef.current, variablesRef.current, token)
             setData(result as T)
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Erro ao buscar dados'
@@ -32,7 +34,12 @@ export function useGraphQL<T>(query: string, variables?: Record<string, any>): U
         } finally {
             setLoading(false)
         }
-    }, [query, variables, token])
+    }, [token])
+
+    useEffect(() => {
+        queryRef.current = query
+        variablesRef.current = variables
+    }, [query, variables])
 
     useEffect(() => {
         if (token) {

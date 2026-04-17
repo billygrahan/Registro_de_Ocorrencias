@@ -32,13 +32,12 @@ export async function graphqlRequest(
         const data = await response.json()
 
         if (data.errors) {
-            console.error('❌ GraphQL Error:', data.errors[0]?.message)
             throw new Error(data.errors[0]?.message || 'GraphQL Error')
         }
 
         return data.data
     } catch (error) {
-        console.error('❌ Request failed:', error instanceof Error ? error.message : String(error))
         throw error
     }
 }
+
