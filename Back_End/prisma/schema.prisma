@@ -27,12 +27,19 @@ enum MachineNameEnum {
   RAMDDR43200MHZ
 }
 
+enum SeverityEnum {
+  BAIXA 
+  MEDIA 
+  ALTA
+}
+
 model Incidente {
-  id          String            @id @default(auto()) @map("_id") @db.ObjectId
-  description String
-  tipo        TipoIncidente     @default(PREVENTIVA)
-  machineName MachineNameEnum
-  status      StatusIncidente   @default(EM_ABERTO)
-  createdAt   DateTime          @default(now())
-  finishedAt  DateTime?
+  id                String            @id @default(auto()) @map("_id") @db.ObjectId
+  description       String
+  typeOfOccurrence  TipoIncidente     @default(PREVENTIVA)
+  machineName       MachineNameEnum
+  status            StatusIncidente   @default(EM_ABERTO)
+  severity          SeverityEnum      @default(BAIXA)
+  createdAt         DateTime          @default(now())
+  finishedAt        DateTime?
 }

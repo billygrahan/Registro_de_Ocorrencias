@@ -19,9 +19,10 @@ export class IncidenteService {
         return {
             id: item.id,
             description: item.description,
-            tipo: item.tipo,
+            typeOfOccurrence: item.typeOfOccurrence,
             machineName: item.machineName,
             status: item.status,
+            severity: item.severity || 'BAIXA',
             createdAt: item.createdAt,
             finishedAt: item.finishedAt || undefined,
         }
@@ -61,11 +62,11 @@ export class IncidenteService {
     }
 
     /**
-     * Busca incidentes por tipo
+     * Busca incidentes por tipo de ocorrência
      */
-    async findByTipo(tipo: string): Promise<Incidente[]> {
+    async findByTypeOfOccurrence(typeOfOccurrence: string): Promise<Incidente[]> {
         const result = await this.prisma.incidente.findMany({
-            where: { tipo: tipo as any },
+            where: { typeOfOccurrence: typeOfOccurrence as any },
             orderBy: { createdAt: 'desc' },
         })
         return result.map(item => this.mapToGraphQL(item)) as Incidente[]
@@ -100,9 +101,10 @@ export class IncidenteService {
         const result = await this.prisma.incidente.create({
             data: {
                 description: createIncidenteInput.description,
-                tipo: createIncidenteInput.tipo as any,
+                typeOfOccurrence: createIncidenteInput.typeOfOccurrence as any,
                 machineName: createIncidenteInput.machineName as any,
                 status: 'EM_ABERTO' as any,
+                severity: createIncidenteInput.severity || 'BAIXA' as any,
             },
         })
         return this.mapToGraphQL(result) as Incidente
@@ -116,10 +118,11 @@ export class IncidenteService {
 
         if (updateIncidenteInput.description !== undefined)
             updateData.description = updateIncidenteInput.description
-        if (updateIncidenteInput.tipo !== undefined) updateData.tipo = updateIncidenteInput.tipo
+        if (updateIncidenteInput.typeOfOccurrence !== undefined) updateData.typeOfOccurrence = updateIncidenteInput.typeOfOccurrence
         if (updateIncidenteInput.machineName !== undefined)
             updateData.machineName = updateIncidenteInput.machineName
         if (updateIncidenteInput.status !== undefined) updateData.status = updateIncidenteInput.status
+        if (updateIncidenteInput.severity !== undefined) updateData.severity = updateIncidenteInput.severity
         if (updateIncidenteInput.finishedAt !== undefined)
             updateData.finishedAt = updateIncidenteInput.finishedAt
 

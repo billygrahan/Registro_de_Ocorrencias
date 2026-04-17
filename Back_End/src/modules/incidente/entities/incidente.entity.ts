@@ -13,13 +13,16 @@ export class Incidente {
     description!: string
 
     @Field()
-    tipo!: string // PREVENTIVA | CORRETIVA | PLANEJADA
+    typeOfOccurrence!: string // PREVENTIVA | CORRETIVA | PLANEJADA
 
     @Field()
     machineName!: string // RTX5090 | R75800X3D | SSDSATA | SSDNVME | RAMDDR43200MHZ
 
     @Field()
     status!: string // EM_ABERTO | CONCLUIDO
+
+    @Field()
+    severity!: string // BAIXA | MEDIA | ALTA
 
     @Field()
     createdAt!: Date

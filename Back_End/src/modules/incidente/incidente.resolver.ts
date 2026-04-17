@@ -57,9 +57,9 @@ export class IncidenteResolver {
      * Query: Buscar incidentes por tipo
      */
     @UseGuards(JwtAuthGuard)
-    @Query(() => [Incidente], { description: 'Busca incidentes por tipo' })
-    async incidentesByTipo(@Args('tipo') tipo: string): Promise<Incidente[]> {
-        return this.incidenteService.findByTipo(tipo)
+    @Query(() => [Incidente], { description: 'Busca incidentes por tipo de ocorrência' })
+    async incidentesByTypeOfOccurrence(@Args('typeOfOccurrence') typeOfOccurrence: string): Promise<Incidente[]> {
+        return this.incidenteService.findByTypeOfOccurrence(typeOfOccurrence)
     }
 
     /**
