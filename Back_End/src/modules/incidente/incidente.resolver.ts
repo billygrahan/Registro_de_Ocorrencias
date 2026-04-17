@@ -24,6 +24,15 @@ export class IncidenteResolver {
     }
 
     /**
+     * Query: Buscar os últimos incidentes
+     */
+    @UseGuards(JwtAuthGuard)
+    @Query(() => [Incidente], { description: 'Retorna os últimos 5 incidentes' })
+    async ultimosincidentes(): Promise<Incidente[]> {
+        return this.incidenteService.findLastN(5)
+    }
+
+    /**
      * Query: Buscar um incidente por ID
      */
     @UseGuards(JwtAuthGuard)

@@ -26,7 +26,7 @@ interface Incidente {
 
 const GET_INCIDENTES = `
     query GetIncidentes {
-        incidentes {
+        ultimosincidentes {
             id
             description
             tipo

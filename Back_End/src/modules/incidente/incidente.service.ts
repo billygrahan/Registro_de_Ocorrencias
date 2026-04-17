@@ -83,6 +83,17 @@ export class IncidenteService {
     }
 
     /**
+     * Busca os últimos N incidentes
+     */
+    async findLastN(limit: number = 5): Promise<Incidente[]> {
+        const result = await this.prisma.incidente.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+        })
+        return result.map(item => this.mapToGraphQL(item)) as Incidente[]
+    }
+
+    /**
      * Cria um novo incidente
      */
     async create(createIncidenteInput: CreateIncidenteInput): Promise<Incidente> {
