@@ -17,21 +17,23 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 interface Incidente {
     id: string
     description: string
-    tipo: string
+    typeOfOccurrence: string
     machineName: string
     status: string
+    severity: string
     createdAt: string
     finishedAt?: string
 }
 
 const GET_INCIDENTES = `
     query GetIncidentes {
-        ultimosincidentes {
+        incidentes {
             id
             description
-            tipo
+            typeOfOccurrence
             machineName
             status
+            severity
             createdAt
             finishedAt
         }
@@ -43,9 +45,10 @@ const CREATE_INCIDENTE = `
         criarIncidente(input: $input) {
             id
             description
-            tipo
+            typeOfOccurrence
             machineName
             status
+            severity
             createdAt
         }
     }
@@ -56,9 +59,10 @@ const UPDATE_INCIDENTE = `
         atualizarIncidente(input: $input) {
             id
             description
-            tipo
+            typeOfOccurrence
             machineName
             status
+            severity
             createdAt
             finishedAt
         }
@@ -83,14 +87,16 @@ export default function MecanicaPage() {
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<'todos' | 'EM_ABERTO' | 'CONCLUIDO'>('todos')
+    const [typeOfOccurrenceFilter, setTypeOfOccurrenceFilter] = useState<string[]>(['PREVENTIVA', 'CORRETIVA', 'PLANEJADA'])
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
     const [completeLoadingId, setCompleteLoadingId] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         description: '',
-        tipo: 'PREVENTIVA',
+        typeOfOccurrence: 'PREVENTIVA',
         machineName: 'RTX5090',
+        severity: 'BAIXA',
     })
 
     // Atualizar incidentes quando dados forem carregados
@@ -116,13 +122,18 @@ export default function MecanicaPage() {
             )
         }
 
+        // Filtro por tipo de ocorrência
+        if (typeOfOccurrenceFilter.length > 0) {
+            filtered = filtered.filter((inc) => typeOfOccurrenceFilter.includes(inc.typeOfOccurrence))
+        }
+
         // Filtro por status
         if (statusFilter !== 'todos') {
             filtered = filtered.filter((inc) => inc.status === statusFilter)
         }
 
         setFilteredIncidentes(filtered)
-    }, [incidentes, searchTerm, statusFilter])
+    }, [incidentes, searchTerm, statusFilter, typeOfOccurrenceFilter])
 
     const handleCreateOrder = async () => {
         if (!formData.description.trim()) {
@@ -139,8 +150,9 @@ export default function MecanicaPage() {
                 {
                     input: {
                         description: formData.description,
-                        tipo: formData.tipo,
+                        typeOfOccurrence: formData.typeOfOccurrence,
                         machineName: formData.machineName,
+                        severity: formData.severity,
                     },
                 },
                 token || ''
@@ -232,22 +244,44 @@ export default function MecanicaPage() {
         setDeleteConfirmId(null)
     }
 
+    const toggleTypeOfOccurrenceFilter = (type: string) => {
+        setTypeOfOccurrenceFilter(prev =>
+            prev.includes(type)
+                ? prev.filter(t => t !== type)
+                : [...prev, type]
+        )
+    }
+
     const resetForm = () => {
         setFormData({
             description: '',
-            tipo: 'PREVENTIVA',
-            machineName: 'MAQUINA_01',
+            typeOfOccurrence: 'PREVENTIVA',
+            machineName: 'RTX5090',
+            severity: 'BAIXA',
         })
     }
 
-    const getTypeBadgeVariant = (tipo: string) => {
-        switch (tipo) {
+    const getTypeOfOccurrenceBadgeVariant = (typeOfOccurrence: string) => {
+        switch (typeOfOccurrence) {
             case 'PREVENTIVA':
                 return 'secondary'
             case 'CORRETIVA':
                 return 'destructive'
             case 'PLANEJADA':
                 return 'outline'
+            default:
+                return 'default'
+        }
+    }
+
+    const getSeverityBadgeVariant = (severity: string) => {
+        switch (severity) {
+            case 'BAIXA':
+                return 'secondary'
+            case 'MEDIA':
+                return 'outline'
+            case 'ALTA':
+                return 'destructive'
             default:
                 return 'default'
         }
@@ -333,9 +367,9 @@ export default function MecanicaPage() {
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Tipo</label>
                                     <Select
-                                        value={formData.tipo}
+                                        value={formData.typeOfOccurrence}
                                         onValueChange={(value) =>
-                                            setFormData({ ...formData, tipo: value })
+                                            setFormData({ ...formData, typeOfOccurrence: value })
                                         }
                                     >
                                         <SelectTrigger className="mt-1">
@@ -368,6 +402,24 @@ export default function MecanicaPage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Severidade</label>
+                                <Select
+                                    value={formData.severity}
+                                    onValueChange={(value) =>
+                                        setFormData({ ...formData, severity: value })
+                                    }
+                                >
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="BAIXA">Baixa</SelectItem>
+                                        <SelectItem value="MEDIA">Média</SelectItem>
+                                        <SelectItem value="ALTA">Alta</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <Button onClick={handleCreateOrder} disabled={loading} className="w-full">
                                 {loading ? 'Criando...' : 'Criar Ordem'}
@@ -402,6 +454,38 @@ export default function MecanicaPage() {
                             />
                         </div>
                     </div>
+
+                    {/* Tipo de Ocorrência Filter - Inline */}
+                    <div className="flex gap-2 items-end">
+                        <Badge
+                            onClick={() => toggleTypeOfOccurrenceFilter('PREVENTIVA')}
+                            className={`capitalize cursor-pointer rounded-full px-4 py-3.5 ${typeOfOccurrenceFilter.includes('PREVENTIVA')
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                }`}
+                        >
+                            Preventiva
+                        </Badge>
+                        <Badge
+                            onClick={() => toggleTypeOfOccurrenceFilter('CORRETIVA')}
+                            className={`capitalize cursor-pointer rounded-full px-4 py-3.5 ${typeOfOccurrenceFilter.includes('CORRETIVA')
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                }`}
+                        >
+                            Corretiva
+                        </Badge>
+                        <Badge
+                            onClick={() => toggleTypeOfOccurrenceFilter('PLANEJADA')}
+                            className={`capitalize cursor-pointer rounded-full px-4 py-3.5 ${typeOfOccurrenceFilter.includes('PLANEJADA')
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                }`}
+                        >
+                            Planejada
+                        </Badge>
+                    </div>
+
                     <div className="sm:w-48">
                         <label className="text-sm font-medium text-gray-700 block mb-2">
                             Status
@@ -436,6 +520,7 @@ export default function MecanicaPage() {
                             <TableHead>Máquina</TableHead>
                             <TableHead>Descrição</TableHead>
                             <TableHead>Tipo</TableHead>
+                            <TableHead>Severidade</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Criado em</TableHead>
                             <TableHead>Finalizado em</TableHead>
@@ -445,13 +530,13 @@ export default function MecanicaPage() {
                     <TableBody>
                         {dataLoading && incidentes.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                                     Carregando...
                                 </TableCell>
                             </TableRow>
                         ) : filteredIncidentes.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                                     Nenhuma ordem de serviço encontrada
                                 </TableCell>
                             </TableRow>
@@ -465,10 +550,17 @@ export default function MecanicaPage() {
                                         {incidente.description}
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getTypeBadgeVariant(incidente.tipo)} className="capitalize">
-                                            {incidente.tipo === 'PREVENTIVA' && 'Preventiva'}
-                                            {incidente.tipo === 'CORRETIVA' && 'Corretiva'}
-                                            {incidente.tipo === 'PLANEJADA' && 'Planejada'}
+                                        <Badge variant={getTypeOfOccurrenceBadgeVariant(incidente.typeOfOccurrence)} className="capitalize">
+                                            {incidente.typeOfOccurrence === 'PREVENTIVA' && 'Preventiva'}
+                                            {incidente.typeOfOccurrence === 'CORRETIVA' && 'Corretiva'}
+                                            {incidente.typeOfOccurrence === 'PLANEJADA' && 'Planejada'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={getSeverityBadgeVariant(incidente.severity)} className="capitalize">
+                                            {incidente.severity === 'BAIXA' && 'Baixa'}
+                                            {incidente.severity === 'MEDIA' && 'Média'}
+                                            {incidente.severity === 'ALTA' && 'Alta'}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
