@@ -16,12 +16,7 @@ import { join } from 'path'
         GraphQLModule.forRoot<ApolloDriverConfig>({
             driver: ApolloDriver,
             autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-            sortSchema: true,
-            // context: ({ req, res }) => ({ req, res }),
-            // cors: {
-            //     origin: ['http://localhost:3666', 'http://localhost:3000'],
-            //     credentials: true,
-            // },
+            sortSchema: true
         }),
         AuthModule,
         IncidenteModule,

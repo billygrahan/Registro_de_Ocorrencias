@@ -54,7 +54,6 @@ export function useAuth(): UseAuthReturn {
             setToken(accessToken)
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Erro ao fazer login'
-            console.error('❌ Login falhou:', message)
             setError(message)
             throw err
         } finally {

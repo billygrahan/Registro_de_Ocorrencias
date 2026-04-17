@@ -20,11 +20,11 @@ enum StatusIncidente {
 }
 
 enum MachineNameEnum {
-  MAQUINA_01
-  MAQUINA_02
-  MAQUINA_03
-  MAQUINA_04
-  MAQUINA_05
+  RTX5090
+  R75800X3D
+  SSDSATA
+  SSDNVME
+  RAMDDR43200MHZ
 }
 
 model Incidente {
@@ -35,5 +35,4 @@ model Incidente {
   status      StatusIncidente   @default(EM_ABERTO)
   createdAt   DateTime          @default(now())
   finishedAt  DateTime?
-  updatedAt   DateTime          @updatedAt
 }

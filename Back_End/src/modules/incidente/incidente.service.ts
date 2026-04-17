@@ -24,7 +24,6 @@ export class IncidenteService {
             status: item.status,
             createdAt: item.createdAt,
             finishedAt: item.finishedAt || undefined,
-            updatedAt: item.updatedAt,
         }
     }
 

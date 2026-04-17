@@ -21,7 +21,6 @@ interface Incidente {
     machineName: string
     status: string
     createdAt: string
-    updatedAt: string
     finishedAt?: string
 }
 
@@ -34,7 +33,6 @@ const GET_INCIDENTES = `
             machineName
             status
             createdAt
-            updatedAt
             finishedAt
         }
     }
@@ -49,7 +47,6 @@ const CREATE_INCIDENTE = `
             machineName
             status
             createdAt
-            updatedAt
         }
     }
 `
@@ -63,7 +60,6 @@ const UPDATE_INCIDENTE = `
             machineName
             status
             createdAt
-            updatedAt
             finishedAt
         }
     }
@@ -94,7 +90,7 @@ export default function MecanicaPage() {
     const [formData, setFormData] = useState({
         description: '',
         tipo: 'PREVENTIVA',
-        machineName: 'MAQUINA_01',
+        machineName: 'RTX5090',
     })
 
     // Atualizar incidentes quando dados forem carregados
@@ -275,6 +271,17 @@ export default function MecanicaPage() {
         }
     }
 
+    const getMachineLabel = (machineName: string) => {
+        const machines: Record<string, string> = {
+            RTX5090: 'RTX5090',
+            R75800X3D: 'R75800X3D',
+            SSDSATA: 'SSDSATA',
+            SSDNVME: 'SSDNVME',
+            RAMDDR43200MHZ: 'RAMDDR43200MHZ',
+        }
+        return machines[machineName] || machineName
+    }
+
     return (
         <div className="flex-1 p-8">
             {/* Breadcrumb */}
@@ -349,15 +356,15 @@ export default function MecanicaPage() {
                                             setFormData({ ...formData, machineName: value })
                                         }
                                     >
-                                        <SelectTrigger className="mt-1">
-                                            <SelectValue />
+                                        <SelectTrigger className="mt-1 w-full">
+                                            <SelectValue placeholder={getMachineLabel(formData.machineName)} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="MAQUINA_01">Máquina 01</SelectItem>
-                                            <SelectItem value="MAQUINA_02">Máquina 02</SelectItem>
-                                            <SelectItem value="MAQUINA_03">Máquina 03</SelectItem>
-                                            <SelectItem value="MAQUINA_04">Máquina 04</SelectItem>
-                                            <SelectItem value="MAQUINA_05">Máquina 05</SelectItem>
+                                            <SelectItem value="RTX5090">RTX5090</SelectItem>
+                                            <SelectItem value="R75800X3D">R75800X3D</SelectItem>
+                                            <SelectItem value="SSDSATA">SSDSATA</SelectItem>
+                                            <SelectItem value="SSDNVME">SSDNVME</SelectItem>
+                                            <SelectItem value="RAMDDR43200MHZ">RAMDDR43200MHZ</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -452,7 +459,7 @@ export default function MecanicaPage() {
                             filteredIncidentes.map((incidente) => (
                                 <TableRow key={incidente.id} className="hover:bg-gray-50">
                                     <TableCell className="font-medium text-gray-900">
-                                        {incidente.machineName.replace('MAQUINA_', 'Máquina ')}
+                                        {getMachineLabel(incidente.machineName)}
                                     </TableCell>
                                     <TableCell className="text-gray-600 max-w-sm truncate">
                                         {incidente.description}

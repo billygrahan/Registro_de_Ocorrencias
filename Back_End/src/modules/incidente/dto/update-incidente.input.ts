@@ -7,7 +7,7 @@ import { InputType, Field, ID } from '@nestjs/graphql'
 export class UpdateIncidenteInput {
     @Field(() => ID)
     id!: string
-    machineName?: string // MAQUINA_01 | MAQUINA_02 | MAQUINA_03 | MAQUINA_04 | MAQUINA_05
+    machineName?: string // RTX5090 | R75800X3D | SSDSATA | SSDNVME | RAMDDR43200MHZ
 
     @Field({ nullable: true })
     status?: string // EM_ABERTO | CONCLUIDO

@@ -12,5 +12,5 @@ export class CreateIncidenteInput {
     tipo!: string // PREVENTIVA | CORRETIVA | PLANEJADA
 
     @Field()
-    machineName!: string // MAQUINA_01 | MAQUINA_02 | MAQUINA_03 | MAQUINA_04 | MAQUINA_05
+    machineName!: string // RTX5090 | R75800X3D | SSDSATA | SSDNVME | RAMDDR43200MHZ
 }
