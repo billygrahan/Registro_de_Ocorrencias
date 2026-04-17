@@ -1,13 +1,19 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
+import { json } from 'express'
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3666'
+
+    app.use(json({ limit: '50mb' }))
+
     app.enableCors({
-        origin: [frontendUrl],
+        origin: true,
         credentials: true,
+        methods: ['GET', 'POST', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight', 'x-apollo-operation-name'],
     })
+
     await app.listen(3333)
 }
 
