@@ -38,7 +38,7 @@ export class IncidenteService {
                 createdAt: 'desc',
             },
         })
-        return result.map(item => this.mapToGraphQL(item)) as Incidente[]
+        return result.map((item: any) => this.mapToGraphQL(item)) as Incidente[]
     }
 
     /**
@@ -61,7 +61,7 @@ export class IncidenteService {
             include: { machine: true },
             orderBy: { createdAt: 'desc' },
         })
-        return result.map(item => this.mapToGraphQL(item)) as Incidente[]
+        return result.map((item: any) => this.mapToGraphQL(item)) as Incidente[]
     }
 
     /**
@@ -73,7 +73,7 @@ export class IncidenteService {
             include: { machine: true },
             orderBy: { createdAt: 'desc' },
         })
-        return result.map(item => this.mapToGraphQL(item)) as Incidente[]
+        return result.map((item: any) => this.mapToGraphQL(item)) as Incidente[]
     }
 
     /**
@@ -85,7 +85,7 @@ export class IncidenteService {
             include: { machine: true },
             orderBy: { createdAt: 'desc' },
         })
-        return result.map(item => this.mapToGraphQL(item)) as Incidente[]
+        return result.map((item: any) => this.mapToGraphQL(item)) as Incidente[]
     }
 
     /**
@@ -97,7 +97,7 @@ export class IncidenteService {
             orderBy: { createdAt: 'desc' },
             take: limit,
         })
-        return result.map(item => this.mapToGraphQL(item)) as Incidente[]
+        return result.map((item: any) => this.mapToGraphQL(item)) as Incidente[]
     }
 
     /**

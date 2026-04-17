@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CreateMachineInput, UpdateMachineInput } from './dto'
 import { Machine } from './entities/machine.entity'
@@ -11,7 +10,7 @@ export class MachineService {
     /**
      * Mapeia dados do Prisma para GraphQL Machine
      */
-    private mapToGraphQL(item: Prisma.MachineGetPayload<{}>): Machine {
+    private mapToGraphQL(item: any): Machine {
         return {
             id: item.id,
             name: item.name,
@@ -25,7 +24,7 @@ export class MachineService {
      */
     async findAll(): Promise<Machine[]> {
         const result = await this.prisma.machine.findMany()
-        return result.map((item: Prisma.MachineGetPayload<{}>) => this.mapToGraphQL(item))
+        return result.map((item: any) => this.mapToGraphQL(item))
     }
 
     /**
@@ -35,7 +34,7 @@ export class MachineService {
         const result = await this.prisma.machine.findUnique({
             where: { id },
         })
-        return this.mapToGraphQL(result as Prisma.MachineGetPayload<{}>)
+        return this.mapToGraphQL(result as any)
     }
 
     /**
@@ -45,7 +44,7 @@ export class MachineService {
         const result = await this.prisma.machine.findMany({
             where: { setor: setor as any },
         })
-        return result.map((item: Prisma.MachineGetPayload<{}>) => this.mapToGraphQL(item))
+        return result.map((item: any) => this.mapToGraphQL(item))
     }
 
     /**
@@ -55,7 +54,7 @@ export class MachineService {
         const result = await this.prisma.machine.findMany({
             where: { status },
         })
-        return result.map((item: Prisma.MachineGetPayload<{}>) => this.mapToGraphQL(item))
+        return result.map((item: any) => this.mapToGraphQL(item))
     }
 
     /**
@@ -69,7 +68,7 @@ export class MachineService {
                 status: createMachineInput.status ?? true,
             },
         })
-        return this.mapToGraphQL(result as Prisma.MachineGetPayload<{}>)
+        return this.mapToGraphQL(result as any)
     }
 
     /**
@@ -86,7 +85,7 @@ export class MachineService {
             where: { id },
             data: updateData,
         })
-        return this.mapToGraphQL(result as Prisma.MachineGetPayload<{}>)
+        return this.mapToGraphQL(result as any)
     }
 
     /**
@@ -131,6 +130,6 @@ export class MachineService {
             },
         })
 
-        return this.mapToGraphQL(result as Prisma.MachineGetPayload<{}>)
+        return this.mapToGraphQL(result as any)
     }
 }
