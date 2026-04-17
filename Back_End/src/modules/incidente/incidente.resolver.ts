@@ -5,11 +5,6 @@ import { CreateIncidenteInput, UpdateIncidenteInput } from './dto'
 import { IncidenteService } from './incidente.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
-/**
- * IncidenteResolver
- * Define as Queries e Mutations para a entidade Incidente
- * Utiliza decorators do @nestjs/graphql
- */
 @Resolver(() => Incidente)
 export class IncidenteResolver {
     constructor(private readonly incidenteService: IncidenteService) { }
@@ -67,8 +62,8 @@ export class IncidenteResolver {
      */
     @UseGuards(JwtAuthGuard)
     @Query(() => [Incidente], { description: 'Busca incidentes por máquina' })
-    async incidentesByMachineName(@Args('machineName') machineName: string): Promise<Incidente[]> {
-        return this.incidenteService.findByMachineName(machineName)
+    async incidentesByMachineId(@Args('machineId', { type: () => ID }) machineId: string): Promise<Incidente[]> {
+        return this.incidenteService.findByMachineId(machineId)
     }
 
     /**

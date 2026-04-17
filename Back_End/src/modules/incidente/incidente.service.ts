@@ -20,7 +20,7 @@ export class IncidenteService {
             id: item.id,
             description: item.description,
             typeOfOccurrence: item.typeOfOccurrence,
-            machineName: item.machineName,
+            machine: item.machine,
             status: item.status,
             severity: item.severity || 'BAIXA',
             createdAt: item.createdAt,
@@ -33,6 +33,7 @@ export class IncidenteService {
      */
     async findAll(): Promise<Incidente[]> {
         const result = await this.prisma.incidente.findMany({
+            include: { machine: true },
             orderBy: {
                 createdAt: 'desc',
             },
@@ -46,6 +47,7 @@ export class IncidenteService {
     async findById(id: string): Promise<Incidente> {
         const result = await this.prisma.incidente.findUnique({
             where: { id },
+            include: { machine: true },
         })
         return this.mapToGraphQL(result) as Incidente
     }
@@ -56,6 +58,7 @@ export class IncidenteService {
     async findByStatus(status: string): Promise<Incidente[]> {
         const result = await this.prisma.incidente.findMany({
             where: { status: status as any },
+            include: { machine: true },
             orderBy: { createdAt: 'desc' },
         })
         return result.map(item => this.mapToGraphQL(item)) as Incidente[]
@@ -67,6 +70,7 @@ export class IncidenteService {
     async findByTypeOfOccurrence(typeOfOccurrence: string): Promise<Incidente[]> {
         const result = await this.prisma.incidente.findMany({
             where: { typeOfOccurrence: typeOfOccurrence as any },
+            include: { machine: true },
             orderBy: { createdAt: 'desc' },
         })
         return result.map(item => this.mapToGraphQL(item)) as Incidente[]
@@ -75,9 +79,10 @@ export class IncidenteService {
     /**
      * Busca incidentes por máquina
      */
-    async findByMachineName(machineName: string): Promise<Incidente[]> {
+    async findByMachineId(machineId: string): Promise<Incidente[]> {
         const result = await this.prisma.incidente.findMany({
-            where: { machineName: machineName as any },
+            where: { machineId },
+            include: { machine: true },
             orderBy: { createdAt: 'desc' },
         })
         return result.map(item => this.mapToGraphQL(item)) as Incidente[]
@@ -88,6 +93,7 @@ export class IncidenteService {
      */
     async findLastN(limit: number = 5): Promise<Incidente[]> {
         const result = await this.prisma.incidente.findMany({
+            include: { machine: true },
             orderBy: { createdAt: 'desc' },
             take: limit,
         })
@@ -102,10 +108,11 @@ export class IncidenteService {
             data: {
                 description: createIncidenteInput.description,
                 typeOfOccurrence: createIncidenteInput.typeOfOccurrence as any,
-                machineName: createIncidenteInput.machineName as any,
+                machineId: createIncidenteInput.machineId,
                 status: 'EM_ABERTO' as any,
                 severity: createIncidenteInput.severity || 'BAIXA' as any,
             },
+            include: { machine: true },
         })
         return this.mapToGraphQL(result) as Incidente
     }
@@ -119,8 +126,8 @@ export class IncidenteService {
         if (updateIncidenteInput.description !== undefined)
             updateData.description = updateIncidenteInput.description
         if (updateIncidenteInput.typeOfOccurrence !== undefined) updateData.typeOfOccurrence = updateIncidenteInput.typeOfOccurrence
-        if (updateIncidenteInput.machineName !== undefined)
-            updateData.machineName = updateIncidenteInput.machineName
+        if (updateIncidenteInput.machineId !== undefined)
+            updateData.machineId = updateIncidenteInput.machineId
         if (updateIncidenteInput.status !== undefined) updateData.status = updateIncidenteInput.status
         if (updateIncidenteInput.severity !== undefined) updateData.severity = updateIncidenteInput.severity
         if (updateIncidenteInput.finishedAt !== undefined)
@@ -129,6 +136,7 @@ export class IncidenteService {
         const result = await this.prisma.incidente.update({
             where: { id },
             data: updateData,
+            include: { machine: true },
         })
         return this.mapToGraphQL(result) as Incidente
     }
@@ -143,6 +151,7 @@ export class IncidenteService {
                 status: 'CONCLUIDO' as any,
                 finishedAt: new Date(),
             },
+            include: { machine: true },
         })
         return this.mapToGraphQL(result) as Incidente
     }

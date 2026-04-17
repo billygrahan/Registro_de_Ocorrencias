@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { IncidenteModule } from './modules/incidente/incidente.module'
+import { MachineModule } from './modules/machine/machine.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { AppController } from './app.controller'
 import { join } from 'path'
@@ -20,6 +21,7 @@ import { join } from 'path'
         }),
         AuthModule,
         IncidenteModule,
+        MachineModule,
     ],
     controllers: [AppController],
 })

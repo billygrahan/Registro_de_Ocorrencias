@@ -14,8 +14,8 @@ export class UpdateIncidenteInput {
     @Field({ nullable: true })
     typeOfOccurrence?: string // PREVENTIVA | CORRETIVA | PLANEJADA
 
-    @Field({ nullable: true })
-    machineName?: string // RTX5090 | R75800X3D | SSDSATA | SSDNVME | RAMDDR43200MHZ
+    @Field(() => ID, { nullable: true })
+    machineId?: string
 
     @Field({ nullable: true })
     status?: string // EM_ABERTO | CONCLUIDO

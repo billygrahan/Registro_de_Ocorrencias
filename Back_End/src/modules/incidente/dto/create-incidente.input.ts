@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql'
+import { InputType, Field, ID } from '@nestjs/graphql'
 
 /**
  * DTO para criar um novo Incidente
@@ -11,8 +11,8 @@ export class CreateIncidenteInput {
     @Field()
     typeOfOccurrence!: string // PREVENTIVA | CORRETIVA | PLANEJADA
 
-    @Field()
-    machineName!: string // RTX5090 | R75800X3D | SSDSATA | SSDNVME | RAMDDR43200MHZ
+    @Field(() => ID)
+    machineId!: string
 
     @Field({ nullable: true })
     severity?: string // BAIXA | MEDIA | ALTA

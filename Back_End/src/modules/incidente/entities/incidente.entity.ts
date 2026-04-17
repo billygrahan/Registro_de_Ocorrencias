@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Machine } from '../../machine/entities/machine.entity'
 
 /**
  * Entidade Incidente - representa a estrutura de dados no banco
@@ -15,8 +16,8 @@ export class Incidente {
     @Field()
     typeOfOccurrence!: string // PREVENTIVA | CORRETIVA | PLANEJADA
 
-    @Field()
-    machineName!: string // RTX5090 | R75800X3D | SSDSATA | SSDNVME | RAMDDR43200MHZ
+    @Field(() => Machine)
+    machine!: Machine
 
     @Field()
     status!: string // EM_ABERTO | CONCLUIDO
