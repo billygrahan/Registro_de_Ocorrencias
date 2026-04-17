@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useGraphQL } from '@/hooks/useGraphQL'
 import { useAuth } from '@/hooks/useAuth'
 import { graphqlRequest } from '@/lib/graphql'
@@ -10,134 +11,128 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { AlertCircle, Trash2, Plus, Search, Loader2 } from 'lucide-react'
+import { AlertCircle, Trash2, Plus, Search, Loader2, ChevronRight, Power, PowerOff } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-interface Incidente {
+interface Machine {
     id: string
-    description: string
-    typeOfOccurrence: string
-    machineName: string
-    status: string
-    severity: string
-    createdAt: string
-    finishedAt?: string
+    name: string
+    setor: string
+    status: boolean
 }
 
-const GET_INCIDENTES = `
-    query GetIncidentes {
-        incidentes {
+const GET_MACHINES = `
+    query GetMachines {
+        machines {
             id
-            description
-            typeOfOccurrence
-            machineName
+            name
+            setor
             status
-            severity
-            createdAt
-            finishedAt
         }
     }
 `
 
-const CREATE_INCIDENTE = `
-    mutation CriarIncidente($input: CreateIncidenteInput!) {
-        criarIncidente(input: $input) {
+const CREATE_MACHINE = `
+    mutation CriarMachine($input: CreateMachineInput!) {
+        criarMachine(input: $input) {
             id
-            description
-            typeOfOccurrence
-            machineName
+            name
+            setor
             status
-            severity
-            createdAt
         }
     }
 `
 
-const UPDATE_INCIDENTE = `
-    mutation AtualizarIncidente($input: UpdateIncidenteInput!) {
-        atualizarIncidente(input: $input) {
+const UPDATE_MACHINE = `
+    mutation AtualizarMachine($input: UpdateMachineInput!) {
+        atualizarMachine(input: $input) {
             id
-            description
-            typeOfOccurrence
-            machineName
+            name
+            setor
             status
-            severity
-            createdAt
-            finishedAt
         }
     }
 `
 
-const DELETE_INCIDENTE = `
-    mutation DeletarIncidente($id: ID!) {
-        deletarIncidente(id: $id)
+const DELETE_MACHINE = `
+    mutation DeletarMachine($id: ID!) {
+        deletarMachine(id: $id)
+    }
+`
+
+const TOGGLE_STATUS_MACHINE = `
+    mutation AlternarStatusMachine($id: ID!) {
+        alternarStatusMachine(id: $id) {
+            id
+            name
+            setor
+            status
+        }
     }
 `
 
 export default function MecanicaPage() {
+    const router = useRouter()
     const { token } = useAuth()
-    const { data: incidentsData, loading: dataLoading, error: dataError, refetch } = useGraphQL<{
-        incidentes: Incidente[]
-    }>(GET_INCIDENTES, {})
+    const { data: machinesData, loading: dataLoading, error: dataError, refetch } = useGraphQL<{
+        machines: Machine[]
+    }>(GET_MACHINES, {})
 
-    const [incidentes, setIncidentes] = useState<Incidente[]>([])
-    const [filteredIncidentes, setFilteredIncidentes] = useState<Incidente[]>([])
+    const [machines, setMachines] = useState<Machine[]>([])
+    const [filteredMachines, setFilteredMachines] = useState<Machine[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
-    const [statusFilter, setStatusFilter] = useState<'todos' | 'EM_ABERTO' | 'CONCLUIDO'>('todos')
-    const [typeOfOccurrenceFilter, setTypeOfOccurrenceFilter] = useState<string[]>(['PREVENTIVA', 'CORRETIVA', 'PLANEJADA'])
+    const [setorFilter, setSetorFilter] = useState<string>('todos')
+    const [statusFilter, setStatusFilter] = useState<string>('todos')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
-    const [completeLoadingId, setCompleteLoadingId] = useState<string | null>(null)
+    const [toggleLoadingId, setToggleLoadingId] = useState<string | null>(null)
     const [formData, setFormData] = useState({
-        description: '',
-        typeOfOccurrence: 'PREVENTIVA',
-        machineName: 'RTX5090',
-        severity: 'BAIXA',
+        name: '',
+        setor: 'PRODUCAO',
     })
 
-    // Atualizar incidentes quando dados forem carregados
+    // Atualizar máquinas quando dados forem carregados
     useEffect(() => {
-        if (incidentsData?.incidentes) {
-            setIncidentes(incidentsData.incidentes)
+        if (machinesData?.machines) {
+            setMachines(machinesData.machines)
             setError(null)
         } else if (dataError) {
             setError(dataError)
         }
-    }, [incidentsData, dataError])
+    }, [machinesData, dataError])
 
-    // Filtrar incidentes
+    // Filtrar máquinas
     useEffect(() => {
-        let filtered = incidentes
+        let filtered = machines
 
         // Filtro por busca
         if (searchTerm) {
             filtered = filtered.filter(
-                (inc) =>
-                    inc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    inc.machineName.toLowerCase().includes(searchTerm.toLowerCase())
+                (machine) =>
+                    machine.name.toLowerCase().includes(searchTerm.toLowerCase())
             )
         }
 
-        // Filtro por tipo de ocorrência
-        if (typeOfOccurrenceFilter.length > 0) {
-            filtered = filtered.filter((inc) => typeOfOccurrenceFilter.includes(inc.typeOfOccurrence))
+        // Filtro por setor
+        if (setorFilter !== 'todos') {
+            filtered = filtered.filter((machine) => machine.setor === setorFilter)
         }
 
         // Filtro por status
         if (statusFilter !== 'todos') {
-            filtered = filtered.filter((inc) => inc.status === statusFilter)
+            const statusBool = statusFilter === 'ativa'
+            filtered = filtered.filter((machine) => machine.status === statusBool)
         }
 
-        setFilteredIncidentes(filtered)
-    }, [incidentes, searchTerm, statusFilter, typeOfOccurrenceFilter])
+        setFilteredMachines(filtered)
+    }, [machines, searchTerm, setorFilter, statusFilter])
 
-    const handleCreateOrder = async () => {
-        if (!formData.description.trim()) {
-            setError('Descrição é obrigatória')
+    const handleCreateMachine = async () => {
+        if (!formData.name.trim()) {
+            setError('Nome da máquina é obrigatório')
             return
         }
 
@@ -146,174 +141,108 @@ export default function MecanicaPage() {
             setError(null)
 
             await graphqlRequest(
-                CREATE_INCIDENTE,
+                CREATE_MACHINE,
                 {
                     input: {
-                        description: formData.description,
-                        typeOfOccurrence: formData.typeOfOccurrence,
-                        machineName: formData.machineName,
-                        severity: formData.severity,
+                        name: formData.name,
+                        setor: formData.setor,
                     },
                 },
                 token || ''
             )
 
-            // Aguardar um pouco antes de recarregar
             await new Promise(resolve => setTimeout(resolve, 500))
-
-            // Recarregar incidentes
             await refetch()
             setIsDialogOpen(false)
             resetForm()
         } catch (err: any) {
-            const errorMessage = err?.message || err?.toString() || 'Erro ao criar ordem'
+            const errorMessage = err?.message || err?.toString() || 'Erro ao criar máquina'
             setError(`Erro: ${errorMessage}`)
         } finally {
             setLoading(false)
         }
     }
 
-    const handleCompleteOrder = async (id: string) => {
+    const handleToggleStatus = async (id: string) => {
         try {
-            setCompleteLoadingId(id)
+            setToggleLoadingId(id)
             setError(null)
 
-            const result = await graphqlRequest(
-                UPDATE_INCIDENTE,
-                {
-                    input: {
-                        id,
-                        status: 'CONCLUIDO',
-                        finishedAt: new Date().toISOString(),
-                    },
-                },
+            await graphqlRequest(
+                TOGGLE_STATUS_MACHINE,
+                { id },
                 token || ''
             )
 
-            // Aguardar um pouco antes de recarregar
             await new Promise(resolve => setTimeout(resolve, 500))
-
-            // Recarregar incidentes
             await refetch()
         } catch (err: any) {
-            const errorMessage = err?.message || err?.toString() || 'Erro ao concluir ordem'
+            const errorMessage = err?.message || err?.toString() || 'Erro ao alternar status'
             setError(`Erro: ${errorMessage}`)
         } finally {
-            setCompleteLoadingId(null)
+            setToggleLoadingId(null)
         }
     }
 
     const handleDelete = (id: string) => {
-        console.log('🗑️ [ABRIR DIALOG] Abrindo diálogo de confirmação para ID:', id)
         setDeleteConfirmId(id)
         setDeleteConfirmOpen(true)
     }
 
-    const confirmDeleteOrder = async () => {
+    const confirmDeleteMachine = async () => {
         if (!deleteConfirmId) return
 
         try {
             setLoading(true)
             setError(null)
 
-            await graphqlRequest(DELETE_INCIDENTE, { id: deleteConfirmId }, token || '')
+            await graphqlRequest(DELETE_MACHINE, { id: deleteConfirmId }, token || '')
 
-            // Aguardar um pouco antes de recarregar
             await new Promise(resolve => setTimeout(resolve, 500))
-
-            // Recarregar incidentes
             await refetch()
-
-            // Remover manualmente se refetch não atualizar
-            setIncidentes(prev => prev.filter(inc => inc.id !== deleteConfirmId))
-
-            // Fechar o diálogo
+            setMachines(prev => prev.filter(m => m.id !== deleteConfirmId))
             setDeleteConfirmOpen(false)
             setDeleteConfirmId(null)
         } catch (err: any) {
-            const errorMessage = err?.message || err?.toString() || 'Erro ao deletar ordem'
+            const errorMessage = err?.message || err?.toString() || 'Erro ao deletar máquina'
             setError(`Erro ao deletar: ${errorMessage}`)
         } finally {
             setLoading(false)
         }
     }
 
-    const cancelDeleteOrder = () => {
-        console.log('❌ Deleção cancelada pelo usuário')
+    const cancelDeleteMachine = () => {
         setDeleteConfirmOpen(false)
         setDeleteConfirmId(null)
     }
 
-    const toggleTypeOfOccurrenceFilter = (type: string) => {
-        setTypeOfOccurrenceFilter(prev =>
-            prev.includes(type)
-                ? prev.filter(t => t !== type)
-                : [...prev, type]
-        )
-    }
-
     const resetForm = () => {
         setFormData({
-            description: '',
-            typeOfOccurrence: 'PREVENTIVA',
-            machineName: 'RTX5090',
-            severity: 'BAIXA',
+            name: '',
+            setor: 'PRODUCAO',
         })
     }
 
-    const getTypeOfOccurrenceBadgeVariant = (typeOfOccurrence: string) => {
-        switch (typeOfOccurrence) {
-            case 'PREVENTIVA':
-                return 'secondary'
-            case 'CORRETIVA':
-                return 'destructive'
-            case 'PLANEJADA':
-                return 'outline'
+    const getSetorLabel = (setor: string) => {
+        const labels: Record<string, string> = {
+            PRODUCAO: 'Produção',
+            USINAGEM: 'Usinagem',
+            TELHAGEM: 'Telhagem',
+        }
+        return labels[setor] || setor
+    }
+
+    const getSetorBadgeColor = (setor: string) => {
+        switch (setor) {
+            case 'PRODUCAO':
+                return 'bg-blue-100 text-blue-800'
+            case 'USINAGEM':
+                return 'bg-purple-100 text-purple-800'
+            case 'TELHAGEM':
+                return 'bg-orange-100 text-orange-800'
             default:
-                return 'default'
+                return 'bg-gray-100 text-gray-800'
         }
-    }
-
-    const getSeverityBadgeVariant = (severity: string) => {
-        switch (severity) {
-            case 'BAIXA':
-                return 'secondary'
-            case 'MEDIA':
-                return 'outline'
-            case 'ALTA':
-                return 'destructive'
-            default:
-                return 'default'
-        }
-    }
-
-    const getStatusBadgeVariant = (status: string) => {
-        return status === 'EM_ABERTO' ? 'destructive' : 'default'
-    }
-
-    const formatDate = (date: string) => {
-        try {
-            return new Date(date).toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-            })
-        } catch {
-            return '-'
-        }
-    }
-
-    const getMachineLabel = (machineName: string) => {
-        const machines: Record<string, string> = {
-            RTX5090: 'RTX5090',
-            R75800X3D: 'R75800X3D',
-            SSDSATA: 'SSDSATA',
-            SSDNVME: 'SSDNVME',
-            RAMDDR43200MHZ: 'RAMDDR43200MHZ',
-        }
-        return machines[machineName] || machineName
     }
 
     return (
@@ -322,111 +251,78 @@ export default function MecanicaPage() {
             <nav className="mb-6 flex items-center gap-2 text-sm text-gray-600">
                 <span>Painel</span>
                 <span>/</span>
-                <span>Mecânica</span>
-                <span>/</span>
-                <span className="font-semibold text-gray-900">Ordens de Serviço</span>
+                <span className="font-semibold text-gray-900">Mecânica</span>
             </nav>
 
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-900">Ordens de Serviço</h1>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button
-                            onClick={() => {
-                                resetForm()
-                                setIsDialogOpen(true)
-                            }}
-                            className="gap-2"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Nova Ordem
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Nova Ordem de Serviço</DialogTitle>
-                            <DialogDescription>
-                                Preencha os dados para criar uma nova ordem de serviço
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-sm font-medium text-gray-700">Descrição</label>
-                                <Textarea
-                                    placeholder="Descreva a ordem de serviço"
-                                    value={formData.description}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, description: e.target.value })
-                                    }
-                                    className="mt-1"
-                                    rows={4}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                <h1 className="text-3xl font-bold text-gray-900">Administração de Máquinas</h1>
+                <div className="flex gap-3">
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button
+                                onClick={() => {
+                                    resetForm()
+                                    setIsDialogOpen(true)
+                                }}
+                                className="gap-2"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Nova Máquina
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Nova Máquina</DialogTitle>
+                                <DialogDescription>
+                                    Preencha os dados para cadastrar uma nova máquina
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700">Tipo</label>
+                                    <label className="text-sm font-medium text-gray-700">Nome</label>
+                                    <Input
+                                        placeholder="Ex: RTX5090"
+                                        value={formData.name}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, name: e.target.value })
+                                        }
+                                        className="mt-1"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Setor</label>
                                     <Select
-                                        value={formData.typeOfOccurrence}
+                                        value={formData.setor}
                                         onValueChange={(value) =>
-                                            setFormData({ ...formData, typeOfOccurrence: value })
+                                            setFormData({ ...formData, setor: value })
                                         }
                                     >
                                         <SelectTrigger className="mt-1">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="PREVENTIVA">Preventiva</SelectItem>
-                                            <SelectItem value="CORRETIVA">Corretiva</SelectItem>
-                                            <SelectItem value="PLANEJADA">Planejada</SelectItem>
+                                            <SelectItem value="PRODUCAO">Produção</SelectItem>
+                                            <SelectItem value="USINAGEM">Usinagem</SelectItem>
+                                            <SelectItem value="TELHAGEM">Telhagem</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700">Máquina</label>
-                                    <Select
-                                        value={formData.machineName}
-                                        onValueChange={(value) =>
-                                            setFormData({ ...formData, machineName: value })
-                                        }
-                                    >
-                                        <SelectTrigger className="mt-1 w-full">
-                                            <SelectValue placeholder={getMachineLabel(formData.machineName)} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="RTX5090">RTX5090</SelectItem>
-                                            <SelectItem value="R75800X3D">R75800X3D</SelectItem>
-                                            <SelectItem value="SSDSATA">SSDSATA</SelectItem>
-                                            <SelectItem value="SSDNVME">SSDNVME</SelectItem>
-                                            <SelectItem value="RAMDDR43200MHZ">RAMDDR43200MHZ</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                <Button onClick={handleCreateMachine} disabled={loading} className="w-full">
+                                    {loading ? 'Criando...' : 'Criar Máquina'}
+                                </Button>
                             </div>
-                            <div>
-                                <label className="text-sm font-medium text-gray-700">Severidade</label>
-                                <Select
-                                    value={formData.severity}
-                                    onValueChange={(value) =>
-                                        setFormData({ ...formData, severity: value })
-                                    }
-                                >
-                                    <SelectTrigger className="mt-1">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="BAIXA">Baixa</SelectItem>
-                                        <SelectItem value="MEDIA">Média</SelectItem>
-                                        <SelectItem value="ALTA">Alta</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <Button onClick={handleCreateOrder} disabled={loading} className="w-full">
-                                {loading ? 'Criando...' : 'Criar Ordem'}
-                            </Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                        </DialogContent>
+                    </Dialog>
+                    <Button
+                        onClick={() => router.push('/painel/mecanica/ordens-de-servico')}
+                        variant="outline"
+                        className="gap-2"
+                    >
+                        Ordens de Serviço
+                        <ChevronRight className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
 
             {/* Error Alert */}
@@ -447,7 +343,7 @@ export default function MecanicaPage() {
                         <div className="relative">
                             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                             <Input
-                                placeholder="Pesquisar por descrição ou máquina..."
+                                placeholder="Pesquisar por nome..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -455,35 +351,24 @@ export default function MecanicaPage() {
                         </div>
                     </div>
 
-                    {/* Tipo de Ocorrência Filter - Inline */}
-                    <div className="flex gap-2 items-end">
-                        <Badge
-                            onClick={() => toggleTypeOfOccurrenceFilter('PREVENTIVA')}
-                            className={`capitalize cursor-pointer rounded-full px-4 py-3.5 ${typeOfOccurrenceFilter.includes('PREVENTIVA')
-                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                }`}
+                    <div className="sm:w-48">
+                        <label className="text-sm font-medium text-gray-700 block mb-2">
+                            Setor
+                        </label>
+                        <Select
+                            value={setorFilter}
+                            onValueChange={setSetorFilter}
                         >
-                            Preventiva
-                        </Badge>
-                        <Badge
-                            onClick={() => toggleTypeOfOccurrenceFilter('CORRETIVA')}
-                            className={`capitalize cursor-pointer rounded-full px-4 py-3.5 ${typeOfOccurrenceFilter.includes('CORRETIVA')
-                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            Corretiva
-                        </Badge>
-                        <Badge
-                            onClick={() => toggleTypeOfOccurrenceFilter('PLANEJADA')}
-                            className={`capitalize cursor-pointer rounded-full px-4 py-3.5 ${typeOfOccurrenceFilter.includes('PLANEJADA')
-                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            Planejada
-                        </Badge>
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="todos">Todos</SelectItem>
+                                <SelectItem value="PRODUCAO">Produção</SelectItem>
+                                <SelectItem value="USINAGEM">Usinagem</SelectItem>
+                                <SelectItem value="TELHAGEM">Telhagem</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="sm:w-48">
@@ -492,15 +377,15 @@ export default function MecanicaPage() {
                         </label>
                         <Select
                             value={statusFilter}
-                            onValueChange={(value: any) => setStatusFilter(value)}
+                            onValueChange={setStatusFilter}
                         >
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="todos">Todos</SelectItem>
-                                <SelectItem value="EM_ABERTO">Em Aberto</SelectItem>
-                                <SelectItem value="CONCLUIDO">Concluído</SelectItem>
+                                <SelectItem value="ativa">Ativa</SelectItem>
+                                <SelectItem value="inativa">Inativa</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -511,93 +396,71 @@ export default function MecanicaPage() {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="p-4 border-b border-gray-200">
                     <h2 className="text-sm font-semibold text-gray-900">
-                        Lista de Ordens de Serviço ({filteredIncidentes.length})
+                        Lista de Máquinas ({filteredMachines.length})
                     </h2>
                 </div>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Máquina</TableHead>
-                            <TableHead>Descrição</TableHead>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead>Severidade</TableHead>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Setor</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead>Criado em</TableHead>
-                            <TableHead>Finalizado em</TableHead>
                             <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {dataLoading && incidentes.length === 0 ? (
+                        {dataLoading && machines.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                                <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                                     Carregando...
                                 </TableCell>
                             </TableRow>
-                        ) : filteredIncidentes.length === 0 ? (
+                        ) : filteredMachines.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                                    Nenhuma ordem de serviço encontrada
+                                <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                                    Nenhuma máquina encontrada
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredIncidentes.map((incidente) => (
-                                <TableRow key={incidente.id} className="hover:bg-gray-50">
+                            filteredMachines.map((machine) => (
+                                <TableRow key={machine.id} className="hover:bg-gray-50">
                                     <TableCell className="font-medium text-gray-900">
-                                        {getMachineLabel(incidente.machineName)}
-                                    </TableCell>
-                                    <TableCell className="text-gray-600 max-w-sm truncate">
-                                        {incidente.description}
+                                        {machine.name}
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getTypeOfOccurrenceBadgeVariant(incidente.typeOfOccurrence)} className="capitalize">
-                                            {incidente.typeOfOccurrence === 'PREVENTIVA' && 'Preventiva'}
-                                            {incidente.typeOfOccurrence === 'CORRETIVA' && 'Corretiva'}
-                                            {incidente.typeOfOccurrence === 'PLANEJADA' && 'Planejada'}
+                                        <Badge className={`capitalize ${getSetorBadgeColor(machine.setor)}`}>
+                                            {getSetorLabel(machine.setor)}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getSeverityBadgeVariant(incidente.severity)} className="capitalize">
-                                            {incidente.severity === 'BAIXA' && 'Baixa'}
-                                            {incidente.severity === 'MEDIA' && 'Média'}
-                                            {incidente.severity === 'ALTA' && 'Alta'}
+                                        <Badge variant={machine.status ? 'default' : 'destructive'}>
+                                            {machine.status ? 'Ativa' : 'Inativa'}
                                         </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusBadgeVariant(incidente.status)}>
-                                            {incidente.status === 'EM_ABERTO' ? 'Em Aberto' : 'Concluído'}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-gray-600 text-sm">
-                                        {formatDate(incidente.createdAt)}
-                                    </TableCell>
-                                    <TableCell className="text-gray-600 text-sm">
-                                        {incidente.finishedAt ? formatDate(incidente.finishedAt) : '-'}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            {incidente.status === 'EM_ABERTO' && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleCompleteOrder(incidente.id)}
-                                                    disabled={completeLoadingId === incidente.id}
-                                                    className="text-green-600 hover:bg-green-50"
-                                                    title="Marcar como concluída"
-                                                >
-                                                    {completeLoadingId === incidente.id ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        'Concluir'
-                                                    )}
-                                                </Button>
-                                            )}
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                onClick={() => handleDelete(incidente.id)}
+                                                onClick={() => handleToggleStatus(machine.id)}
+                                                disabled={toggleLoadingId === machine.id}
+                                                className={machine.status ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}
+                                                title={machine.status ? 'Desativar' : 'Ativar'}
+                                            >
+                                                {toggleLoadingId === machine.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : machine.status ? (
+                                                    <Power className="w-4 h-4" />
+                                                ) : (
+                                                    <PowerOff className="w-4 h-4" />
+                                                )}
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDelete(machine.id)}
                                                 className="hover:bg-red-50 text-red-600"
-                                                title="Deletar ordem"
+                                                title="Deletar máquina"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
@@ -614,31 +477,31 @@ export default function MecanicaPage() {
             <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
                 <DialogContent className="max-w-sm">
                     <DialogHeader>
-                        <DialogTitle className="text-red-600">Excluir Ordem de Serviço</DialogTitle>
+                        <DialogTitle className="text-red-600">Excluir Máquina</DialogTitle>
                         <DialogDescription>
-                            Esta ação não pode ser desfeita. A ordem será deletada permanentemente do sistema.
+                            Esta ação não pode ser desfeita. A máquina será deletada permanentemente do sistema.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="rounded-lg bg-red-50 border border-red-200 p-3 my-4">
                         <p className="text-sm text-red-800">
-                            <strong>Atenção!</strong> Você está prestes a deletar uma ordem de serviço. Tem certeza?
+                            <strong>Atenção!</strong> Você está prestes a deletar uma máquina. Todas as ordens associadas serão removidas. Tem certeza?
                         </p>
                     </div>
                     <div className="flex items-center justify-end gap-3">
                         <Button
                             variant="outline"
-                            onClick={cancelDeleteOrder}
+                            onClick={cancelDeleteMachine}
                             disabled={loading}
                         >
                             Cancelar
                         </Button>
                         <Button
                             variant="destructive"
-                            onClick={confirmDeleteOrder}
+                            onClick={confirmDeleteMachine}
                             disabled={loading}
                             className="gap-2"
                         >
-                            {loading ? 'Deletando...' : 'Deletar Ordem'}
+                            {loading ? 'Deletando...' : 'Deletar Máquina'}
                         </Button>
                     </div>
                 </DialogContent>

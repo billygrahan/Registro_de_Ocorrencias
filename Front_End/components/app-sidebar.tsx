@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
@@ -77,7 +78,22 @@ export function AppSidebar() {
             >
                 {/* Header */}
                 <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                    {isOpen && <h1 className="text-xl font-bold text-gray-900">▲ Monitoro</h1>}
+                    {isOpen && (
+                        <Image
+                            src="/monitoro-logo.png"
+                            alt="Monitoro Logo"
+                            width={150}
+                            height={150}
+                        />
+                    )}
+                    {!isOpen && (
+                        <Image
+                            src="/monitoro-logo.png"
+                            alt="Monitoro Logo"
+                            width={32}
+                            height={32}
+                        />
+                    )}
                     <Button
                         variant="ghost"
                         size="icon"

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -37,7 +38,18 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen flex relative">
+            {/* Logo no canto superior esquerdo */}
+            <div className="absolute top-8 left-8 z-20">
+                <Image
+                    src="/monitoro-logo.png"
+                    alt="Monitoro Logo"
+                    width={60}
+                    height={60}
+                    priority
+                />
+            </div>
+
             {/* Lado esquerdo - Imagem */}
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gray-900 relative overflow-hidden"
@@ -48,19 +60,12 @@ export default function LoginPage() {
                 }}
             >
                 <div className="absolute inset-0 bg-black/40"></div>
-                <div className="absolute top-8 left-8 text-white z-10">
-                    <div className="text-4xl font-bold">▲ Monitoro</div>
-                    <p className="text-sm text-gray-200 mt-2">Sistema de Registro de Ocorrências</p>
-                </div>
             </div>
 
             {/* Lado direito - Formulário */}
             <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
                 <div className="w-full max-w-md space-y-8">
-                    {/* Logo mobile */}
-                    <div className="lg:hidden text-center">
-                        <h1 className="text-3xl font-bold text-gray-900">Monitoro</h1>
-                    </div>
+                    
 
                     {/* Título */}
                     <div className="text-center">

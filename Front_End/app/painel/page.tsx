@@ -8,11 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
+interface Machine {
+    id: string
+    name: string
+    setor: string
+    status: boolean
+}
+
 interface Incidente {
     id: string
     description: string
     typeOfOccurrence: string
-    machineName: string
+    machine: Machine
     status: string
     severity: string
     createdAt: string
@@ -25,7 +32,12 @@ const GET_ULTIMOS_INCIDENTES = `
             id
             description
             typeOfOccurrence
-            machineName
+            machine {
+                id
+                name
+                setor
+                status
+            }
             status
             severity
             createdAt
@@ -92,17 +104,6 @@ export default function PainelPage() {
         }
     }
 
-    const getMachineLabel = (machineName: string) => {
-        const machines: Record<string, string> = {
-            RTX5090: 'RTX5090',
-            R75800X3D: 'R75800X3D',
-            SSDSATA: 'SSDSATA',
-            SSDNVME: 'SSDNVME',
-            RAMDDR43200MHZ: 'RAMDDR43200MHZ',
-        }
-        return machines[machineName] || machineName
-    }
-
     return (
         <div className="flex-1 p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Bem-vindo ao Painel</h1>
@@ -149,7 +150,7 @@ export default function PainelPage() {
                             incidentes.map((incidente) => (
                                 <TableRow key={incidente.id} className="hover:bg-gray-50">
                                     <TableCell className="font-medium text-gray-900">
-                                        {getMachineLabel(incidente.machineName)}
+                                        {incidente.machine.name}
                                     </TableCell>
                                     <TableCell className="text-gray-600 max-w-sm truncate">
                                         {incidente.description}
