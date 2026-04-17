@@ -1,9 +1,11 @@
 {
-  "build": {
-    "builder": "nixpacks"
-  },
-  "deploy": {
-    "restartPolicyType": "on_failure",
-    "restartPolicyMaxRetries": 5
-  }
+    "build": {
+        "builder": "nixpacks",
+        "buildCommand": "cd Back_End && npm install && npx prisma generate && npm run build"
+    },
+    "deploy": {
+        "startCommand": "cd Back_End && npm run start:prod",
+        "restartPolicyType": "on_failure",
+        "restartPolicyMaxRetries": 5
+    }
 }
