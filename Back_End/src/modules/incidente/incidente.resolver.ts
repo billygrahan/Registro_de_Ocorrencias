@@ -10,7 +10,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard'
  * Define as Queries e Mutations para a entidade Incidente
  * Utiliza decorators do @nestjs/graphql
  */
-@UseGuards(JwtAuthGuard)
 @Resolver(() => Incidente)
 export class IncidenteResolver {
     constructor(private readonly incidenteService: IncidenteService) { }
@@ -18,6 +17,7 @@ export class IncidenteResolver {
     /**
      * Query: Buscar todos os incidentes
      */
+    @UseGuards(JwtAuthGuard)
     @Query(() => [Incidente], { description: 'Retorna todos os incidentes' })
     async incidentes(): Promise<Incidente[]> {
         return this.incidenteService.findAll()
@@ -26,6 +26,7 @@ export class IncidenteResolver {
     /**
      * Query: Buscar um incidente por ID
      */
+    @UseGuards(JwtAuthGuard)
     @Query(() => Incidente, {
         nullable: true,
         description: 'Busca um incidente específico por ID',
@@ -37,6 +38,7 @@ export class IncidenteResolver {
     /**
      * Query: Buscar incidentes por status
      */
+    @UseGuards(JwtAuthGuard)
     @Query(() => [Incidente], { description: 'Busca incidentes por status' })
     async incidentesByStatus(@Args('status') status: string): Promise<Incidente[]> {
         return this.incidenteService.findByStatus(status)
@@ -45,6 +47,7 @@ export class IncidenteResolver {
     /**
      * Query: Buscar incidentes por tipo
      */
+    @UseGuards(JwtAuthGuard)
     @Query(() => [Incidente], { description: 'Busca incidentes por tipo' })
     async incidentesByTipo(@Args('tipo') tipo: string): Promise<Incidente[]> {
         return this.incidenteService.findByTipo(tipo)
@@ -53,6 +56,7 @@ export class IncidenteResolver {
     /**
      * Query: Buscar incidentes por máquina
      */
+    @UseGuards(JwtAuthGuard)
     @Query(() => [Incidente], { description: 'Busca incidentes por máquina' })
     async incidentesByMachineName(@Args('machineName') machineName: string): Promise<Incidente[]> {
         return this.incidenteService.findByMachineName(machineName)
@@ -61,6 +65,7 @@ export class IncidenteResolver {
     /**
      * Mutation: Criar um novo incidente
      */
+    @UseGuards(JwtAuthGuard)
     @Mutation(() => Incidente, { description: 'Cria um novo incidente' })
     async criarIncidente(
         @Args('input') createIncidenteInput: CreateIncidenteInput,
@@ -71,6 +76,7 @@ export class IncidenteResolver {
     /**
      * Mutation: Atualizar um incidente
      */
+    @UseGuards(JwtAuthGuard)
     @Mutation(() => Incidente, {
         nullable: true,
         description: 'Atualiza um incidente existente',
@@ -84,6 +90,7 @@ export class IncidenteResolver {
     /**
      * Mutation: Marcar um incidente como concluído
      */
+    @UseGuards(JwtAuthGuard)
     @Mutation(() => Incidente, {
         nullable: true,
         description: 'Marca um incidente como concluído',
@@ -95,6 +102,7 @@ export class IncidenteResolver {
     /**
      * Mutation: Deletar um incidente
      */
+    @UseGuards(JwtAuthGuard)
     @Mutation(() => Boolean, { description: 'Deleta um incidente' })
     async deletarIncidente(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
         return this.incidenteService.delete(id)
