@@ -20,6 +20,8 @@ import { Request } from 'express'
             autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
             sortSchema: true,
             csrfPrevention: false,
+            introspection: true,
+            playground: process.env.NODE_ENV !== 'production',
             context: ({ req }: { req: Request }) => {
                 return { req };
             },
